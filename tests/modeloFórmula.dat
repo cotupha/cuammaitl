@@ -1,0 +1,17 @@
+{s0, s1, s2}
+{p, q, r}
+{(s0, s1), (s1, s0), (s0,s2), (s2, s2), (s1, s2)}
+#s0>{p,q}#s1>{q,r}#s2>{r}
+(AG (Then (Or (Or (Lit p)(Lit q))(Lit r))(EF (EG (Lit r)))))
+(AU (Lit p)(Lit r))
+(EU (And (Lit p)(Lit q))(Lit r))
+(AF (Lit r))
+(EG (Lit r))
+(Not (EF (And (Lit p)(Lit r))))
+(Not (AX (And (Lit q)(Lit r))))
+(EX (And (Lit q)(Lit r)))
+(Not (Lit r))
+(And (Lit p)(Lit q))
+
+Como el programa sólo lee las primeras cinco líneas, las demás pueden
+quedarse en el archivo para pruebas posteriores.

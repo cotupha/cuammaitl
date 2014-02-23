@@ -1,0 +1,146 @@
+\documentclass[12pt,letterpaper,spanish]{article}
+\usepackage{babel}
+\usepackage[spanish]{layout}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{verbatim}
+
+\setlength{\unitlength}{1cm}
+\setlength{\parindent}{0cm}
+
+\pagestyle{plain}
+
+\author{Laura Alicia Leonides Jiménez}
+\title{Verificador para \textsc{ctl}}
+
+\date{ } 
+
+\begin{document}
+\maketitle
+
+En el presente documento se especifica cómo fue implementado el programa, cuáles archivos
+se entregan en la distribución anexa a la versión electrónica del documento y cómo debe
+ejecutarse el programa.
+\\\\
+Asimismo, se incluyen algunos ejemplos de los archivos en los que debe especificarse el modelo
+y la fórmula a verificar.
+
+\section{Implementación}
+El programa fue realizado en Haskell 98 y contiene los siguientes módulos:
+\begin{description}
+ \item [SintaxisCTL.] En él se define la sintaxis de las
+fórmulas de \textsc{ctl} que se podrán procesar.
+ \item [VerificadorCTL.] Se encarga de verificar un modelo y una fórmula.
+ \item [Rela.] En él se define la relación de transición.
+ \item [Modelo.] Contiene las definiciones de tipos de datos
+ \item [Main.] Módulo principal del sistema. Encargado de obtener el archivo
+con las definiciones y de procesar la información que ahí se encuentra (modelo y fórmula)
+necesarias para especificar un modelo.
+ \item [Lector.] Se encarga de leer el archivo en el que se encuentra
+la definición del modelo y la fórmula. Parsea cada una de las partes involucradas.
+\end{description}
+
+Todos los archivos fuente utilizan la codificación \textsc{utf}-8.
+
+\section{Distribución}
+Junto con la versión electrónica de este documento, se entrega el archivo \texttt{VerificadorCTL.tar.gz}.
+Dicho archivo debe descomprimirse y entonces se tendrá la siguiente estructura de directorios:
+\begin{verbatim}
+VerificadorCTL
+|-- VerificadorCTL
+|-- modeloFórmula.dat
+`-- src
+    |-- Lector.hs
+    |-- Main.hs
+    |-- Modelo.hs
+    |-- Rela.hs
+    |-- SintaxisCTL.hs
+    `-- VerificadorCTL.hs
+\end{verbatim}
+
+
+\section{Ejecución}
+Para ejecutar el programa tenemos tres opciones:
+\\\\
+\textbf{Con el ejecutable incluido}
+\\\\
+En la distribución se incluye el archivo VerificadorCTL, que es un ejecutable generado 
+para Linux Mandriva.
+Se tiene que ejecutar de la siguiente manera:
+\begin{verbatim}
+[cotupha@ronja VerificadorCTL]$ ./VerificadorCTL
+\end{verbatim}
+\textbf{Con un intérprete}
+\\\\
+Basta con cargar el módulo \texttt{Main} en un intérprete de Haskell (las
+pruebas se realizaron utilizando \textsc{ghc}i Versión 6.8.2) e invocar a la función
+\texttt{main}, de la siguiente manera:
+\begin{verbatim}
+[cotupha@ronja src]$ ghci Main
+GHCi, version 6.8.2: http://www.haskell.org/ghc/  :? for help
+Loading package base ... linking ... done.
+Compiling SintaxisCTL   (SintaxisCTL.hs, interpreted)
+Compiling Rela          (Rela.hs, interpreted)
+Compiling Modelo        (Modelo.hs, interpreted)
+Compiling Lector        (Lector.hs, interpreted)
+Compiling VerificadorCTL(VerificadorCTL.hs, interpreted)
+Compiling Main          (Main.hs, interpreted)
+Ok,modules loaded:VerificadorCTL,Main,Lector,Modelo,Rela,SintaxisCTL.
+*Main> main
+\end{verbatim}
+\textbf{Con un ejecutable generado para otro sistema}
+\\\\
+Si se requiere de un ejecutable para otro sistema operativo, debe compilarse el código,
+generar el nuevo ejecutable y, posteriormente correrlo.
+\\\\
+Una vez que se ha ejecutado el programa (con alguno de los tres métodos antes mencionados),
+éste solicita al usuario que proporcione el nombre del archivo en el
+que se encuentra almacenada la definición del modelo y la fórmula. Es importante señalar que debe
+proporcionarse la ruta relativa al archivo desde el directorio en el que se está ejecutando
+el programa.
+\\\\
+Después de especificar el nombre del archivo, el programa parsea dicho archivo y muestra en pantalla
+los estados que satisfacen a la fórmula dada en el modelo especificado, como se muestra a continuación:
+\begin{verbatim}
+Dame el nombre del archivo con la especificación del modelo M 
+y la fórmula a
+../modeloFórmula.dat
+Los estados s tales que M,s|=a son:
+fromList ["s0","s1","s2"]
+\end{verbatim}
+
+
+\section{Definición del modelo y fórmula}
+Es necesario proporcionar al programa un archivo en el que se encuentren las definiciones necesarias
+para determinar el modelo y la fórmula a verificar.
+Deben especificarse, en el orden presentado, los siguientes componentes:
+\begin{itemize}
+ \item Conjunto de estados.
+ \item Conjunto de átomos.
+ \item Relación de transición.
+ \item Función de etiquetamiento.
+ \item Fórmula.
+\end{itemize}
+A continuación se incluye un ejemplo de dicho archivo:
+\begin{lstlisting} [mathescape,basicstyle=\small,columns=flexible,xleftmargin=0.9cm,numbers=left,caption=Ejemplo,label=ejemplo,language=C++,extendedchars=true]
+{s0, s1, s2}
+{p, q, r}
+{(s0, s1), (s1, s0), (s0,s2), (s2, s2), (s1, s2)}
+#s0>{p,q}#s1>{q,r}#s2>{r}
+(And(Lit r)(Lit q))
+\end{lstlisting}
+Ejemplos de otras fórmulas:
+\begin{lstlisting} [mathescape,basicstyle=\small,columns=flexible,xleftmargin=0.9cm,numbers=left,caption=Fórmulas,label=ejemploF,language=C++,extendedchars=true]
+(AG (Then (Or (Or (Lit p)(Lit q))(Lit r))(EF (EG (Lit r)))))
+(AU (Lit p)(Lit r))
+(EU (And (Lit p)(Lit q))(Lit r))
+(AF (Lit r))
+(EG (Lit r))
+(Not (EF (And (Lit p)(Lit r))))
+(Not (AX (And (Lit q)(Lit r))))
+(EX (And (Lit q)(Lit r)))
+(Not (Lit r))
+(And (Lit p)(Lit q))
+\end{lstlisting}
+
+\end{document}
